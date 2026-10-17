@@ -1,0 +1,39 @@
+<div class="payment-container">
+  <div class="topbar">
+    <h2>Make a Payment</h2>
+    <button class="link-btn" (click)="logout()">Log out</button>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #payForm="ngForm">
+    <label>
+      Email
+      <input type="email" name="email" [(ngModel)]="email" required />
+    </label>
+
+    <label>
+      Amount (₦)
+      <input type="number" name="amount" [(ngModel)]="amountNaira" min="1" required />
+    </label>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button type="submit" [disabled]="loading || payForm.invalid">
+      {{ loading ? 'Initiating...' : 'Pay Now' }}
+    </button>
+  </form>
+
+  <div class="result" *ngIf="authorizationUrl">
+    <p>Payment initiated — reference: <code>{{ reference }}</code></p>
+    <a [href]="authorizationUrl" target="_blank" class="pay-link">
+      Complete payment on Paystack →
+    </a>
+
+    <p class="status">
+      Status: <strong>{{ status || 'Waiting for confirmation...' }}</strong>
+    </p>
+    <p class="hint" *ngIf="status === 'Pending' || !status">
+      This updates automatically once our backend independently verifies the payment with
+      Paystack — it does not just trust the webhook payload.
+    </p>
+  </div>
+</div>

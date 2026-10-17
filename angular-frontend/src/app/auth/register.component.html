@@ -1,0 +1,25 @@
+<div class="auth-container">
+  <h2>Register</h2>
+
+  <form (ngSubmit)="onSubmit()" #registerForm="ngForm" *ngIf="!success">
+    <label>
+      Email
+      <input type="email" name="email" [(ngModel)]="email" required />
+    </label>
+
+    <label>
+      Password
+      <input type="password" name="password" [(ngModel)]="password" required minlength="6" />
+    </label>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button type="submit" [disabled]="loading || registerForm.invalid">
+      {{ loading ? 'Creating account...' : 'Register' }}
+    </button>
+  </form>
+
+  <p *ngIf="success">Account created! Redirecting to login...</p>
+
+  <p>Already have an account? <a routerLink="/login">Log In</a></p>
+</div>

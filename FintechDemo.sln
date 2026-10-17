@@ -1,0 +1,7 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# This is a minimal .sln stub. If Visual Studio / Rider complains about GUIDs,
+# regenerate properly with: dotnet new sln -n FintechDemo
+# then: dotnet sln add AuthService/AuthService.csproj PaymentService/PaymentService.csproj
+#       WebhookService/WebhookService.csproj InventoryService/InventoryService.csproj
+#       NotificationService/NotificationService.csproj ApiGateway/ApiGateway.csproj
+#       Shared/Shared.csproj

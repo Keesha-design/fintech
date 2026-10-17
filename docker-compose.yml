@@ -1,0 +1,108 @@
+version: "3.9"
+
+services:
+  # ---------- Infrastructure ----------
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672" # management UI: http://localhost:15672 (guest/guest)
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+
+  payment-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: paymentdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+
+  # ---------- Microservices ----------
+  auth-service:
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+    depends_on:
+      - auth-db
+    environment:
+      - ConnectionStrings__AuthDb=Host=auth-db;Port=5432;Database=authdb;Username=postgres;Password=postgres
+    ports:
+      - "5001:8080"
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: PaymentService/Dockerfile
+    depends_on:
+      - payment-db
+      - redis
+      - rabbitmq
+    environment:
+      - ConnectionStrings__PaymentDb=Host=payment-db;Port=5432;Database=paymentdb;Username=postgres;Password=postgres
+      - Redis__ConnectionString=redis:6379
+      - RabbitMq__Host=rabbitmq
+    ports:
+      - "5002:8080"
+
+  webhook-service:
+    build:
+      context: .
+      dockerfile: WebhookService/Dockerfile
+    depends_on:
+      - redis
+      - rabbitmq
+    environment:
+      - Redis__ConnectionString=redis:6379
+      - RabbitMq__Host=rabbitmq
+    ports:
+      - "5003:8080"
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: InventoryService/Dockerfile
+    depends_on:
+      - redis
+    environment:
+      - Redis__ConnectionString=redis:6379
+    ports:
+      - "5004:8080"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - RabbitMq__Host=rabbitmq
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    depends_on:
+      - auth-service
+      - payment-service
+      - webhook-service
+      - inventory-service
+    ports:
+      - "5000:8080" # single entry point — Angular frontend talks to this
+
+volumes:
+  auth-db-data:
+  payment-db-data:
