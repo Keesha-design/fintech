@@ -97,7 +97,7 @@ Infra: RabbitMQ (events/queue), Redis (idempotency + stock + dedup), Postgres x2
   trigger a webhook event, and watch it land in RabbitMQ's `payment-webhook-received_error`
   queue (visible at `http://localhost:15672`) after retries are exhausted.
 
-## Deliberately left as "v2" (mention in interviews, don't stress about building)
+## Deliberately left as "v2" 
 
 - Full double-entry ledger (separate `LedgerEntries` table with matching debit/credit rows)
 - KYC/AML checks
